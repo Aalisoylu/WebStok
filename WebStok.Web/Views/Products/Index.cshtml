@@ -1,0 +1,193 @@
+@model WebStok.Web.Models.ProductPageViewModel
+
+@{
+    ViewData["Title"] = "Ürünler";
+}
+
+<h1>Ürün ve parça kartları</h1>
+<p class="text-muted">
+    Ürün bilgilerini tanımlayın. Stok miktarları hareketlerden hesaplanacaktır.
+</p>
+
+@if (TempData["Success"] is string message)
+{
+    <div class="alert alert-success" role="alert">@message</div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Ürün ekle</h2>
+
+        <form asp-controller="Products"
+              asp-action="Create"
+              method="post"
+              asp-antiforgery="true">
+
+            <div asp-validation-summary="All"
+                 class="text-danger"
+                 role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.Code" class="form-label">
+                        Ürün / parça kodu
+                    </label>
+                    <input asp-for="Input.Code"
+                           class="form-control"
+                           maxlength="60"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.Barcode" class="form-label">
+                        Barkod
+                    </label>
+                    <input asp-for="Input.Barcode"
+                           class="form-control"
+                           maxlength="64"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.Name" class="form-label">
+                        Ürün adı
+                    </label>
+                    <input asp-for="Input.Name"
+                           class="form-control"
+                           maxlength="200"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.CategoryId" class="form-label">
+                        Kategori
+                    </label>
+                    <select asp-for="Input.CategoryId"
+                            asp-items="Model.CategoryOptions"
+                            class="form-select"
+                            required>
+                        <option value="">Kategori seçiniz</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Unit" class="form-label">
+                        Ölçü birimi
+                    </label>
+                    <select asp-for="Input.Unit" class="form-select">
+                        <option value="Adet">Adet</option>
+                        <option value="Kg">Kilogram</option>
+                        <option value="Metre">Metre</option>
+                        <option value="Litre">Litre</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.PurchasePrice" class="form-label">
+                        Alış fiyatı
+                    </label>
+                    <input asp-for="Input.PurchasePrice"
+                           type="text"
+                           inputmode="decimal"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.SalePrice" class="form-label">
+                        Satış fiyatı
+                    </label>
+                    <input asp-for="Input.SalePrice"
+                           type="text"
+                           inputmode="decimal"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.MinimumStockLevel"
+                           class="form-label">
+                        Minimum stok seviyesi
+                    </label>
+                    <input asp-for="Input.MinimumStockLevel"
+                           type="text"
+                           inputmode="decimal"
+                           class="form-control"
+                           required />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.IssueMethod" class="form-label">
+                        Çıkış yöntemi
+                    </label>
+                    <select asp-for="Input.IssueMethod"
+                            class="form-select">
+                        <option value="1">FIFO — İlk giren önce çıkar</option>
+                        <option value="2">FEFO — SKT'si yakın olan önce çıkar</option>
+                    </select>
+                </div>
+            </div>
+
+            <p class="form-text mt-3">
+                Ondalıklı değerlerde virgül kullanın. Örnek: 1250,50
+            </p>
+
+            <button type="submit" class="btn btn-primary">
+                Ürün ekle
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">Ürün listesi (@Model.Products.Count)</h2>
+
+        @if (Model.Products.Count == 0)
+        {
+            <p class="text-muted mb-0">Henüz ürün eklenmedi.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ürün</th>
+                            <th scope="col">Kategori</th>
+                            <th scope="col">Birim</th>
+                            <th scope="col">Alış</th>
+                            <th scope="col">Satış</th>
+                            <th scope="col">Min. stok</th>
+                            <th scope="col">Yöntem</th>
+                            <th scope="col">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.Products)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@product.Name</strong>
+                                    <div>@product.Code</div>
+                                    <small class="text-muted">
+                                        Barkod: @product.Barcode
+                                    </small>
+                                </td>
+                                <td class="text-break">
+                                    @product.CategoryPath
+                                </td>
+                                <td>@product.Unit</td>
+                                <td>@product.PurchasePrice.ToString("N2")</td>
+                                <td>@product.SalePrice.ToString("N2")</td>
+                                <td>@product.MinimumStockLevel.ToString("0.###")</td>
+                                <td>@product.IssueMethod.ToString().ToUpperInvariant()</td>
+                                <td>@(product.IsActive ? "Aktif" : "Pasif")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

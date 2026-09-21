@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="WebStok.Business/WebStok.Business.csproj" />
+  <Project Path="WebStok.DataAccess/WebStok.DataAccess.csproj" />
+  <Project Path="WebStok.Domain/WebStok.Domain.csproj" />
+  <Project Path="WebStok.Web/WebStok.Web.csproj" />
+</Solution>

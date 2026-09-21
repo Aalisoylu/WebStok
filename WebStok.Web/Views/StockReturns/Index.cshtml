@@ -1,0 +1,18 @@
+@model WebStok.Business.DTOs.StockReturnDto
+@{ ViewData["Title"] = "Stok iadesi"; }
+<h1>Stok iadesi</h1>
+<p class="text-muted">Üretim veya servis çıkışını, çıktığı depoya ve lota iade edin.</p>
+@if (TempData["Success"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+<div class="card"><div class="card-body">
+<form asp-action="Create" method="post" asp-antiforgery="true">
+    <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <input asp-for="OperationId" type="hidden" />
+    <div class="mb-3"><label asp-for="OriginalMovementId" class="form-label">Çıkış hareket numarası</label>
+    <input asp-for="OriginalMovementId" class="form-control" type="number" min="1" required aria-describedby="movementHelp" />
+    <div id="movementHelp" class="form-text"><a asp-controller="StockMovements" asp-action="Index">Hareket geçmişinden</a> bir üretim veya servis çıkışı seçebilirsiniz. Son 200 hareketin dışındaki çıkışlar için hareket numarasını girin.</div></div>
+    <div class="mb-3"><label asp-for="Quantity" class="form-label">İade miktarı</label><input asp-for="Quantity" class="form-control" type="text" inputmode="decimal" required /><span asp-validation-for="Quantity" class="text-danger"></span></div>
+    <div class="mb-4"><label asp-for="Description" class="form-label">İade nedeni</label><textarea asp-for="Description" class="form-control" rows="3" maxlength="500" required></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+    <button class="btn btn-primary" type="submit">İadeyi kaydet</button>
+    <a class="btn btn-outline-secondary" asp-controller="StockMovements" asp-action="Index">Hareketlere dön</a>
+</form>
+</div></div>

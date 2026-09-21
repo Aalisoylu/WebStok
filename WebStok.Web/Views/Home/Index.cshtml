@@ -1,0 +1,37 @@
+@model WebStok.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Genel bakış";
+    var positions = Model.Balances.GroupBy(x => new { x.ProductId, x.WarehouseId }).Select(x => x.First()).ToList();
+    var critical = positions.Where(x => x.IsCritical).ToList();
+    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+    var expiring = Model.Balances.Count(x => x.Quantity > 0 && x.ExpiryDate.HasValue && x.ExpiryDate.Value >= today && x.ExpiryDate.Value <= today.AddDays(30));
+    var expired = Model.Balances.Count(x => x.Quantity > 0 && x.ExpiryDate.HasValue && x.ExpiryDate.Value < today);
+}
+<div class="page-heading"><div><div class="eyebrow">ÇALIŞMA ALANINIZ</div><h1>Her şey kontrolünüz altında.</h1><p class="text-muted">Stoklarınızı takip edin, günlük operasyonlarınızı tek yerden yönetin.</p></div><a class="btn btn-primary" asp-controller="StockReceipts" asp-action="Index">+ Yeni mal kabul</a></div>
+<div class="metric-grid">
+    <div class="metric"><span>Hareket gören ürün</span><strong>@positions.Select(x => x.ProductId).Distinct().Count()</strong><small>Stok kaydı bulunan ürünler</small></div>
+    <div class="metric"><span>Hareket gören depo</span><strong>@positions.Select(x => x.WarehouseId).Distinct().Count()</strong><small>Erişim kapsamınızdaki depolar</small></div>
+    <div class="metric metric-warning"><span>Kritik stok</span><strong>@critical.Count</strong><small>Minimum seviyedeki ürün / depo</small></div>
+    <div class="metric"><span>Yaklaşan son kullanma</span><strong>@expiring</strong><small>30 gün içinde · @expired süresi geçmiş lot/depo</small></div>
+</div>
+<div class="section-heading quick-heading"><h2>Hızlı işlemler</h2><span class="text-muted small">Bir sonraki adımınız</span></div>
+<div class="quick-actions">
+    <a asp-controller="StockIssues" asp-action="Index"><svg class="ui-icon" aria-hidden="true"><use href="#icon-out" /></svg><div>Stok çıkışı<small>Depodan ürün çıkışı oluşturun</small></div><span>↗</span></a>
+    <a asp-controller="StockTransfers" asp-action="Index"><svg class="ui-icon" aria-hidden="true"><use href="#icon-transfer" /></svg><div>Depolar arası transfer<small>Ürünlerinizi başka depoya taşıyın</small></div><span>↗</span></a>
+    <a asp-controller="StockReturns" asp-action="Index"><svg class="ui-icon" aria-hidden="true"><use href="#icon-return" /></svg><div>İade kaydet<small>İade edilen ürünleri stoğa alın</small></div><span>↗</span></a>
+</div>
+<div class="dashboard-panels">
+<div class="card mb-4"><div class="card-body"><div class="section-heading"><h2>Kritik stoklar</h2><a asp-controller="StockBalances" asp-action="Index">Tüm stoklar →</a></div>
+@if (critical.Count == 0) { <p class="empty-state">Mevcut stok kayıtlarında kritik seviyede ürün bulunmuyor.</p> }
+else { <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Ürün</th><th>Depo</th><th>Kalan</th><th>Minimum</th></tr></thead><tbody>
+@foreach (var row in critical.Take(8)) { <tr><td><strong>@row.ProductName</strong><div class="text-muted small">@row.ProductCode</div></td><td>@row.WarehouseName</td><td><span class="stock-alert">@row.WarehouseProductQuantity.ToString("0.###") @row.Unit</span></td><td>@row.MinimumStockLevel.ToString("0.###") @row.Unit</td></tr> }
+</tbody></table></div> }
+<p class="small text-muted mb-0">Özet, stok hareketi bulunan ürün ve depoları kapsar.</p>
+</div></div>
+<div class="card"><div class="card-body"><div class="section-heading"><h2>Son hareketler</h2><a asp-controller="StockMovements" asp-action="Index">Hareket geçmişi →</a></div>
+@if (Model.Movements.Count == 0) { <p class="empty-state">Henüz stok hareketi yok. İlk ürününüzü ve deponuzu tanımlayıp mal kabul işlemi oluşturun.</p> }
+else { <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Ürün / Depo</th><th>İşlem</th><th>Miktar</th><th>Tarih (UTC)</th></tr></thead><tbody>
+@foreach (var row in Model.Movements.Take(8)) { <tr><td><strong>@row.ProductName</strong><div class="text-muted small">@row.WarehouseName · @row.LotNumber</div></td><td>@row.MovementType</td><td class="@(row.Quantity > 0 ? "text-success" : "text-danger")">@(row.Quantity > 0 ? "+" : "")@row.Quantity.ToString("0.###") @row.Unit</td><td>@row.CreatedAtUtc.ToString("dd.MM.yyyy HH:mm")</td></tr> }
+</tbody></table></div> }
+</div></div>
+</div>

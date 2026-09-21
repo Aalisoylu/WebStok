@@ -1,0 +1,20 @@
+# Build and IDE output
+**/bin/
+**/obj/
+.vs/
+.vscode/
+*.user
+*.suo
+# Local data and credentials
+**/App_Data/
+*.db
+*.db-shm
+*.db-wal
+*.pfx
+*.p12
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+# Local verification artifacts
+.artifacts/

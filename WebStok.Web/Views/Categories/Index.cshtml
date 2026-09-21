@@ -1,0 +1,131 @@
+@model WebStok.Web.Models.CategoryPageViewModel
+
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<div class="mb-4">
+    <h1>Kategoriler</h1>
+    <p class="text-muted">
+        Cihaz, aksesuar ve parçalar için kategori ağacını yönetin.
+    </p>
+</div>
+
+@if (TempData["Success"] is string message)
+{
+    <div class="alert alert-success" role="alert">
+        @message
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Kategori ekle</h2>
+
+                <form asp-controller="Categories"
+                      asp-action="Create"
+                      method="post"
+                      asp-antiforgery="true">
+
+                    <div asp-validation-summary="All"
+                         class="text-danger"
+                         role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Name" class="form-label">
+                            Kategori adı
+                        </label>
+
+                        <input asp-for="Input.Name"
+                               class="form-control"
+                               maxlength="150"
+                               required />
+
+                        <span asp-validation-for="Input.Name"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.ParentId" class="form-label">
+                            Üst kategori
+                        </label>
+
+                        <select asp-for="Input.ParentId"
+                                asp-items="Model.ParentOptions"
+                                class="form-select">
+                            <option value="">Yok — ana kategori</option>
+                        </select>
+
+                        <span asp-validation-for="Input.ParentId"
+                              class="text-danger"></span>
+
+                        <div class="form-text">
+                            Alt kategori eklemek için bağlı olacağı
+                            kategoriyi seçin.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Kategori ekle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5 mb-3">
+                    Kategori listesi (@Model.Categories.Count)
+                </h2>
+
+                @if (Model.Categories.Count == 0)
+                {
+                    <p class="text-muted mb-0">
+                        Henüz kategori yok. İlk kategorinizi ekleyin.
+                    </p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Kategori yolu</th>
+                                    <th scope="col">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <tr>
+                                        <td class="text-break">
+                                            @Model.CategoryPaths[category.Id]
+                                        </td>
+                                        <td>
+                                            @if (category.IsActive)
+                                            {
+                                                <span class="badge bg-success">
+                                                    Aktif
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    Pasif
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,183 @@
+@model WebStok.Web.Models.StockReceiptPageViewModel
+
+@{
+    ViewData["Title"] = "Mal Kabul";
+}
+
+<h1>Mal kabul</h1>
+<p class="text-muted">
+    Ürünleri lot bilgileriyle seçilen depoya kaydedin.
+</p>
+
+@if (TempData["Success"] is string message)
+{
+    <div class="alert alert-success text-break" role="alert">
+        @message
+    </div>
+}
+
+@if (Model.Data.Products.Count == 0 ||
+     Model.Data.Warehouses.Count == 0)
+{
+    <div class="alert alert-warning">
+        İşlem için aktif bir ürün ve erişebildiğiniz aktif bir depo gerekir.
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-controller="StockReceipts"
+                  asp-action="Create"
+                  method="post"
+                  asp-antiforgery="true">
+
+                <input asp-for="Input.OperationId" type="hidden" />
+
+                <div asp-validation-summary="All"
+                     class="text-danger"
+                     role="alert"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.ProductId"
+                               class="form-label">Ürün</label>
+
+                        <select asp-for="Input.ProductId"
+                                class="form-select"
+                                required>
+                            <option value="">Ürün seçiniz</option>
+                            @foreach (var item in Model.Data.Products)
+                            {
+                                <option value="@item.Id">@item.Label</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.WarehouseId"
+                               class="form-label">Depo</label>
+
+                        <select asp-for="Input.WarehouseId"
+                                class="form-select"
+                                required>
+                            <option value="">Depo seçiniz</option>
+                            @foreach (var item in Model.Data.Warehouses)
+                            {
+                                <option value="@item.Id">@item.Label</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.LotNumber"
+                               class="form-label">Lot numarası</label>
+                        <input asp-for="Input.LotNumber"
+                               class="form-control"
+                               maxlength="60"
+                               placeholder="LOT-2026-01"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.Quantity"
+                               class="form-label">Giriş miktarı</label>
+                        <input asp-for="Input.Quantity"
+                               type="text"
+                               inputmode="decimal"
+                               class="form-control"
+                               required />
+                        <div class="form-text">
+                            Adet biriminde tam sayı;
+                            diğer birimlerde ondalık için virgül kullanın.
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.ProductionDate"
+                               class="form-label">Üretim tarihi</label>
+                        <input asp-for="Input.ProductionDate"
+                               type="date"
+                               asp-format="{0:yyyy-MM-dd}"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.ExpiryDate"
+                               class="form-label">Son kullanma tarihi</label>
+                        <input asp-for="Input.ExpiryDate"
+                               type="date"
+                               asp-format="{0:yyyy-MM-dd}"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.WarrantyEndDate"
+                               class="form-label">Garanti bitiş tarihi</label>
+                        <input asp-for="Input.WarrantyEndDate"
+                               type="date"
+                               asp-format="{0:yyyy-MM-dd}"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Input.Description"
+                               class="form-label">Açıklama</label>
+                        <textarea asp-for="Input.Description"
+                                  class="form-control"
+                                  rows="2"
+                                  maxlength="500"
+                                  required></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">
+                    Stok girişini kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">Son 50 mal kabul kaydı</h2>
+
+        @if (Model.Data.RecentReceipts.Count == 0)
+        {
+            <p class="text-muted mb-0">Henüz mal kabul kaydı yok.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Tarih (UTC)</th>
+                            <th scope="col">Ürün</th>
+                            <th scope="col">Depo</th>
+                            <th scope="col">Lot</th>
+                            <th scope="col">Miktar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Data.RecentReceipts)
+                        {
+                            <tr>
+                                <td>
+                                    @row.CreatedAtUtc.ToString("dd.MM.yyyy HH:mm")
+                                </td>
+                                <td>@row.Product</td>
+                                <td>@row.Warehouse</td>
+                                <td>@row.LotNumber</td>
+                                <td>
+                                    +@row.Quantity.ToString("0.###") @row.Unit
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

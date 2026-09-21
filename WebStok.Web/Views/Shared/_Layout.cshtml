@@ -1,0 +1,70 @@
+@using Microsoft.AspNetCore.Authorization
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService AuthorizationService
+@{
+    var inventoryAccess = (await AuthorizationService.AuthorizeAsync(User, "ManageInventory")).Succeeded;
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isLogin = currentController == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Login";
+    var icons = new[] { "overview", "box", "in", "out", "transfer", "return", "history", "box", "grid", "warehouse" };
+    var navigation = new[] {
+        ("Home", "Genel bakış"), ("StockBalances", "Stok durumu"),
+        ("StockReceipts", "Mal kabul"), ("StockIssues", "Stok çıkışı"),
+        ("StockTransfers", "Transfer"), ("StockReturns", "İade"),
+        ("StockMovements", "Hareket geçmişi"), ("Products", "Ürünler"),
+        ("Categories", "Kategoriler"), ("Warehouses", "Depolar")
+    };
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · WebStok</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(isLogin ? "login-page" : "")">
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="11" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="18" width="7" height="3" rx="1"/></symbol>
+    <symbol id="icon-box" viewBox="0 0 24 24"><path d="m12 3 9 5v9l-9 5-9-5V8zM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/></symbol>
+    <symbol id="icon-in" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></symbol>
+    <symbol id="icon-out" viewBox="0 0 24 24"><path d="M12 15V3m-5 5 5-5 5 5M4 15v5h16v-5"/></symbol>
+    <symbol id="icon-transfer" viewBox="0 0 24 24"><path d="M3 7h17m-4-4 4 4-4 4M21 17H4m4-4-4 4 4 4"/></symbol>
+    <symbol id="icon-return" viewBox="0 0 24 24"><path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12" transform="translate(0 -2)"/></symbol>
+    <symbol id="icon-history" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 1 7M3 4v6h6M12 7v6l4 2"/></symbol>
+    <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="icon-warehouse" viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13M8 21V11h8v10M8 15h8M8 19h8"/></symbol>
+</svg>
+<a class="skip-link" href="#main-content">İçeriğe geç</a>
+<div class="app-shell">
+<aside class="sidebar">
+    <a class="brand" asp-controller="Home" asp-action="Index"><span class="brand-mark">W</span> WebStok</a>
+    <div class="sidebar-caption">DEPO VE ENVANTER</div>
+    @if (inventoryAccess) {
+    <nav class="side-nav" aria-label="Ana menü">
+    @for (var i = 0; i < navigation.Length; i++) {
+        var item = navigation[i];
+        @if (i == 2) { <div class="nav-group-label">OPERASYONLAR</div> }
+        @if (i == 7) { <div class="nav-group-label">TANIMLAR</div> }
+        <a class="@(currentController == item.Item1 ? "active" : "")" aria-current="@(currentController == item.Item1 ? "page" : null)" asp-controller="@item.Item1" asp-action="Index"><svg class="ui-icon" aria-hidden="true"><use href="#icon-@icons[i]" /></svg>@item.Item2</a>
+    }
+    </nav>
+    }
+    <div class="sidebar-note"><span class="note-dot"></span> Her hareket kayıt altında.<small>WebStok · Envanter yönetimi</small></div>
+</aside>
+<div class="workspace">
+<header class="topbar"><div class="breadcrumb-label">Çalışma alanı <span>/</span> <strong>@ViewData["Title"]</strong></div>
+@if (User.Identity?.IsAuthenticated == true) {
+    <div class="d-flex align-items-center gap-3"><span class="user-avatar" aria-hidden="true">@(User.Identity.Name?.FirstOrDefault().ToString().ToUpperInvariant())</span><span class="user-name">@User.Identity.Name</span><form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true"><button class="btn btn-sm btn-outline-secondary" type="submit">Çıkış yap</button></form></div>
+} else { <a class="btn btn-sm btn-primary" asp-controller="Account" asp-action="Login">Giriş yap</a> }
+</header>
+<main id="main-content" class="main-content" tabindex="-1">@RenderBody()</main>
+<footer class="app-footer">WebStok · Stok ve depo yönetimi</footer>
+</div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

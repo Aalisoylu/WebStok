@@ -1,0 +1,82 @@
+@model List<WebStok.Business.DTOs.StockMovementListDto>
+
+@{
+    ViewData["Title"] = "Stok Hareketleri";
+}
+
+<h1>Stok hareket geçmişi</h1>
+
+<p class="text-muted">
+    Erişebildiğiniz depolardaki son 200 hareket gösterilir.
+    Aynı işlem kimliğine sahip satırlar tek bir işlemin parçalarıdır.
+</p>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Henüz görüntülenecek hareket yok.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Tarih (UTC)</th>
+                            <th scope="col">Ürün / Depo</th>
+                            <th scope="col">Lot</th>
+                            <th scope="col">Hareket</th>
+                            <th scope="col">Miktar</th>
+                            <th scope="col">Kullanıcı</th>
+                            <th scope="col">Detay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @row.CreatedAtUtc.ToString("dd.MM.yyyy HH:mm:ss")
+                                </td>
+                                <td>
+                                    <strong>@row.ProductName</strong>
+                                    <div class="text-muted">
+                                        @row.ProductCode
+                                    </div>
+                                    <div>@row.WarehouseName</div>
+                                </td>
+                                <td>@row.LotNumber</td>
+                                <td>@row.MovementType
+@if (row.CanReturn) { <div><a class="btn btn-sm btn-outline-primary mt-2" asp-controller="StockReturns" asp-action="Index" asp-route-movementId="@row.Id">İade yap</a></div> }</td>
+                                <td class="text-nowrap">
+                                    <strong class="@(row.Quantity > 0 ? "text-success" : "text-danger")">
+                                        @(row.Quantity > 0 ? "+" : "")@row.Quantity.ToString("0.###")
+                                        @row.Unit
+                                    </strong>
+                                </td>
+                                <td>@row.PerformedBy</td>
+                                <td>
+                                    <details>
+                                        <summary>Göster</summary>
+                                        <p class="mt-2 mb-1 text-break">
+                                            @row.Description
+                                        </p>
+                                        <small class="text-muted">
+                                            Hareket no: @row.Id
+                                        </small>
+                                        <div class="text-break">
+                                            <small>İşlem: @row.OperationId</small>
+                                        </div>
+                                    </details>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

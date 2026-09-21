@@ -1,0 +1,69 @@
+@model WebStok.Business.DTOs.LoginDto
+
+@{
+    ViewData["Title"] = "Giriş";
+}
+
+<div class="login-layout">
+    <section class="login-intro">
+        <span class="eyebrow">DAHA DÜZENLİ BİR İŞ GÜNÜ</span>
+        <h1>Stoğunuz net.<br />Kontrol sizde.</h1>
+        <p>Ürünler, depolar ve tüm stok hareketleri.<br />İşinizin akışını tek bir yerden yönetin.</p>
+        <div class="inventory-art" aria-hidden="true"><svg class="ui-icon"><use href="#icon-warehouse" /></svg><span>Ürün</span><span>Depo</span><span>Hareket</span></div>
+        <div class="login-caption">Takip edin. Planlayın. Güvenle ilerleyin.</div>
+    </section>
+    <div class="login-form-column">
+        <div class="card login-card">
+            <div class="card-body p-4">
+                <div class="eyebrow">WEBSTOK'A HOŞ GELDİNİZ</div>
+                <h2 class="h3 mb-2">Hesabınıza giriş yapın</h2>
+                <p class="text-muted mb-4">
+                    Çalışma alanınıza kaldığınız yerden devam edin.
+                </p>
+
+                <form asp-controller="Account"
+                      asp-action="Login"
+                      method="post"
+                      asp-antiforgery="true">
+
+                    <input type="hidden"
+                           name="returnUrl"
+                           value="@ViewData["ReturnUrl"]" />
+
+                    <div asp-validation-summary="All"
+                         class="text-danger"
+                         role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">
+                            Kullanıcı adı
+                        </label>
+                        <input asp-for="Username"
+                               class="form-control"
+                               autocomplete="username"
+                               maxlength="50"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Password" class="form-label">
+                            Şifre
+                        </label>
+                        <input type="password"
+                               id="Password"
+                               name="Password"
+                               class="form-control"
+                               autocomplete="current-password"
+                               maxlength="128"
+                               required />
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Giriş yap
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

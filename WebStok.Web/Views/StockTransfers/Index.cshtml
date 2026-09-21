@@ -1,0 +1,159 @@
+@model WebStok.Web.Models.StockTransferPageViewModel
+
+@{
+    ViewData["Title"] = "Depolar Arası Transfer";
+}
+
+<h1>Depolar arası transfer</h1>
+
+<p class="text-muted">
+    Kaynak depodan çıkan ürünler aynı lot bilgileriyle hedef depoya girer.
+    Lot seçimi ürünün FIFO/FEFO ayarına göre yapılır.
+</p>
+
+@if (TempData["Success"] is string message)
+{
+    <div class="alert alert-success text-break" role="alert">
+        @message
+    </div>
+}
+
+@if (Model.ProductOptions.Count == 0 ||
+     Model.WarehouseOptions.Count < 2)
+{
+    <div class="alert alert-warning">
+        Transfer için aktif bir ürün ve erişebildiğiniz
+        en az iki aktif depo gerekir.
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-controller="StockTransfers"
+                  asp-action="Create"
+                  method="post"
+                  asp-antiforgery="true">
+
+                <input asp-for="Input.OperationId" type="hidden" />
+
+                <div asp-validation-summary="All"
+                     class="text-danger"
+                     role="alert"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.ProductId"
+                               class="form-label">Ürün</label>
+
+                        <select asp-for="Input.ProductId"
+                                asp-items="Model.ProductOptions"
+                                class="form-select"
+                                required>
+                            <option value="">Ürün seçiniz</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.Quantity"
+                               class="form-label">Transfer miktarı</label>
+
+                        <input asp-for="Input.Quantity"
+                               type="text"
+                               inputmode="decimal"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.SourceWarehouseId"
+                               class="form-label">Kaynak depo</label>
+
+                        <select asp-for="Input.SourceWarehouseId"
+                                asp-items="Model.WarehouseOptions"
+                                class="form-select"
+                                required>
+                            <option value="">Kaynak depo seçiniz</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.TargetWarehouseId"
+                               class="form-label">Hedef depo</label>
+
+                        <select asp-for="Input.TargetWarehouseId"
+                                asp-items="Model.WarehouseOptions"
+                                class="form-select"
+                                required>
+                            <option value="">Hedef depo seçiniz</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Input.Description"
+                               class="form-label">Açıklama</label>
+
+                        <textarea asp-for="Input.Description"
+                                  class="form-control"
+                                  rows="2"
+                                  maxlength="500"
+                                  required></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">
+                    Transferi kaydet
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">Depolardaki lot bakiyeleri</h2>
+
+        @if (Model.Balances.Count == 0)
+        {
+            <p class="text-muted mb-0">Henüz stok hareketi yok.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Depo</th>
+                            <th scope="col">Ürün</th>
+                            <th scope="col">Lot</th>
+                            <th scope="col">Bakiye</th>
+                            <th scope="col">SKT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.Balances)
+                        {
+                            <tr>
+                                <td>@row.WarehouseName</td>
+                                <td>
+                                    <strong>@row.ProductName</strong>
+                                    <div class="text-muted">
+                                        @row.ProductCode
+                                    </div>
+                                </td>
+                                <td>@row.LotNumber</td>
+                                <td>
+                                    @row.Quantity.ToString("0.###")
+                                    @row.Unit
+                                </td>
+                                <td>
+                                    @(row.ExpiryDate?.ToString("dd.MM.yyyy") ?? "—")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
