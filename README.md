@@ -2,6 +2,10 @@
 
 ASP.NET Core MVC ve SQLite ile geliştirilmiş, Türkçe stok ve depo yönetim uygulaması.
 
+Proje Youtube linki
+https://youtu.be/5Re71zD_h4g
+
+
 ## Özellikler
 
 - Genel bakış: kritik stoklar, yaklaşan son kullanma tarihleri ve son hareketler.
