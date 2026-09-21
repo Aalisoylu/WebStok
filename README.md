@@ -3,7 +3,7 @@
 ASP.NET Core MVC ve SQLite ile geliştirilmiş, Türkçe stok ve depo yönetim uygulaması.
 
 Proje Youtube linki
-https://youtu.be/5Re71zD_h4g [![Tanıtım Videosu](https://img.shields.io/badge/YouTube-Tanıtım_Videosu-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/5Re71zD_h4g)
+[▶️ Proje tanıtımını YouTube'da izle](https://youtu.be/5Re71zD_h4g)
 
 
 ## Özellikler
